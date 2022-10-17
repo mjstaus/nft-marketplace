@@ -1,22 +1,25 @@
 import Head from "next/head";
 import Link from "next/link";
-import Router, { useRouter } from "next/router";
+import Router from "next/router";
 import {
   ConnectWallet,
   MediaRenderer,
   useActiveListings,
   useAddress,
-  useMarketplace,
+  useContract,
 } from "@thirdweb-dev/react";
 import styles from "../styles/Home.module.css";
 
 const CONTRACT_ADDRESS = "0xaF7C92b69446649766D3BCB37C7Ffd2C78e8dA3b";
 
 export default function Home() {
+  const MARKETPLACE_CONTRACT_ADDRESS =
+  "0xaF7C92b69446649766D3BCB37C7Ffd2C78e8dA3b";
   const address = useAddress();
-  const marketplace = useMarketplace(CONTRACT_ADDRESS);
+  const { contract } = useContract(MARKETPLACE_CONTRACT_ADDRESS, "marketplace");
   const { data: listings, isLoading: loadingListings } =
-    useActiveListings(marketplace);
+    useActiveListings(contract);
+  console.log("listings", listings);
   return (
     <div className={styles.container}>
       <Head>
@@ -26,24 +29,28 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-        {/* <ConnectWallet/> */}
+        <ConnectWallet />
         {loadingListings ? (
           <div>Loading Listings...</div>
         ) : (
           <div>
             {listings?.map((listing) => {
               <div
-              key={listing.id}
-              onClick={()=> Router.push(`/listing/${listing.id}`)}>
-            <MediaRenderer src={listing.asset.image}/>
-              <h2>
-                <Link href={`/listing/${listing.id}`}>
-                  <a>{listing.asset.name}</a>
-                </Link>
-              </h2>
-              <p>
-                <strong>{listing.buyoutCurrencyValuePerToken.displayValue}</strong>{" "}{listing.buyoutCurrencyValuePerToken.symbol}
-              </p>
+                key={listing.id}
+                onClick={() => Router.push(`/listing/${listing.id}`)}
+              >
+                <MediaRenderer src={listing.asset.image} />
+                <h2>
+                  <Link href={`/listing/${listing.id}`}>
+                    <a>{listing.asset.name}</a>
+                  </Link>
+                </h2>
+                <p>
+                  <strong>
+                    {listing.buyoutCurrencyValuePerToken.displayValue}
+                  </strong>{" "}
+                  {listing.buyoutCurrencyValuePerToken.symbol}
+                </p>
               </div>;
             })}
           </div>
